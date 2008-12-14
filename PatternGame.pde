@@ -5,19 +5,13 @@
  * repeatedly to avoid the output line getting turned on.
  */
  
-int button1Pin = 2;
-int button2Pin = 3;
-int button3Pin = 4;
-int button4Pin = 5;
-
-int led1Pin = 6;
-int led2Pin = 7;
-int led3Pin = 8;
-int led4Pin = 9;
 
 int pattern[] = {1,2,3,4,4,3,2,1};
-int buttonPins[] = {2,3,4,5};
-int ledPins[]={6,7,8,9};
+
+int buttonPins[] = {2,3,4,5}; // i.e. button 1 is Arduino pin 2...
+int ledPins[] = {6,7,8,9}; // and the LEDs span pins 6-9
+int lightPin = 13; // There's an extra status LED on pin 13
+int signalPin =11; // and you attach audio out to pin 11
 
 int phase = 0;
 
@@ -37,8 +31,6 @@ long minMargin = 15;
 long percentMargin = 20;
 long maxMargin = 50;
 
-int lightPin = 13;
-int signalPin =11;
 long time = 0;                    // variable for reading the pin status
 
 int errorOn = 0;
@@ -50,8 +42,7 @@ void setup() {
   digitalWrite(signalPin, LOW);
   digitalWrite(lightPin, LOW);  
 
-  int i;
-  for (i = 0; i < 4; i++) {
+  for (int i = 0; i < 4; i++) {
     pinMode(buttonPins[i], INPUT);     // declare pushbutton as input
     pinMode(ledPins[i], OUTPUT);     // declare pushbutton as input  
   }
@@ -130,8 +121,7 @@ void playSample() {
 
 void twinkleFirstLight() {
   int ledPin = ledForPhase(0);
-  int count;
-  for (count = 1; count <= 8; count++) {
+  for (int count = 1; count <= 8; count++) {
     digitalWrite(ledPin, HIGH);
     delay(100);
     digitalWrite(ledPin, LOW);
