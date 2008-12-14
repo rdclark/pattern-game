@@ -10,7 +10,15 @@ int button2Pin = 3;
 int button3Pin = 4;
 int button4Pin = 5;
 
-int expectedPin[] = {2,3,4,5,5,4,3,2}; // buttons 1-2-3-4-4-3-2-1
+int led1Pin = 6;
+int led2Pin = 7;
+int led3Pin = 8;
+int led4Pin = 9;
+
+int pattern[] = {1,2,3,4,4,3,2,1};
+int buttonPins[] = {2,3,4,5};
+int ledPins[]={6,7,8,9};
+
 int phase = 0;
 
 long SECONDS = 1000000L;
@@ -42,25 +50,23 @@ void setup() {
   digitalWrite(signalPin, LOW);
   digitalWrite(lightPin, LOW);  
 
-  pinMode(button1Pin, INPUT);     // declare pushbutton as input  
-  pinMode(button2Pin, INPUT);     // declare pushbutton as input  
-  pinMode(button3Pin, INPUT);     // declare pushbutton as input  
-  pinMode(button4Pin, INPUT);     // declare pushbutton as input
+  int i;
+  for (i = 0; i < 4; i++) {
+    pinMode(buttonPins[i], INPUT);     // declare pushbutton as input
+    pinMode(ledPins[i], OUTPUT);     // declare pushbutton as input  
+  }
   
     Serial.begin(9600);           // Set up serial communication at 9600bps
-    Serial.println("Ready");
     allowedTime = maxTime;
-
-    int i = 0;
-    for (i = 0; i < 4; i++) {
-    // Signal readiness, then wait
-      digitalWrite(lightPin, HIGH);  
-      delay(250);      
-      digitalWrite(lightPin, LOW);  
-      delay(250);
+    
+    // Attractor loop
+    for (;;) {
+      playSample(); 
+      twinkleFirstLight(); // signal readiness
+      // As soon as the first is pressed, the game begins
+      time = pulseIn(buttonForPhase(0), HIGH, 15000000L); // 15 seconds
+      if (time != 0) break;
     }
-    // As soon as button 1 is pressed, the game begins
-    pulseIn(expectedPin[phase], HIGH, 30000000L); // 30 seconds
     phase++;
 }
 
@@ -82,7 +88,7 @@ void loop(){
   Serial.print("ms ");
   Serial.print(phase);
   Serial.print(": ");
-  time = pulseIn(expectedPin[phase], HIGH, allowedTime);
+  time = pulseIn(buttonForPhase(phase), HIGH, allowedTime);
   if (time == 0L) {            // did they click the expected switch?
       if (!errorOn) {
         analogWrite(signalPin, 128); // Play 1 490hz 50% square wave
@@ -110,4 +116,36 @@ void loop(){
 //        allowedTime = averageTime;
       }
   }
+}
+
+void playSample() {
+    for (int phase = 0; phase <= 7; phase++) {
+      int ledPin = ledForPhase(phase);
+      digitalWrite(ledPin, HIGH);  
+      delay(250);      
+      digitalWrite(ledPin, LOW);  
+      delay(250);
+    }
+}
+
+void twinkleFirstLight() {
+  int ledPin = ledForPhase(0);
+  int count;
+  for (count = 1; count <= 8; count++) {
+    digitalWrite(ledPin, HIGH);
+    delay(100);
+    digitalWrite(ledPin, LOW);
+    delay(100);
+  } 
+}
+
+
+int ledForPhase(int phase) {
+  int patternValue = pattern[phase];
+  return ledPins[patternValue-1];
+}
+
+int buttonForPhase(int phase) {
+    int patternValue = pattern[phase];
+    return buttonPins[patternValue-1];
 }
