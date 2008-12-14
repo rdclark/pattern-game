@@ -4,7 +4,8 @@
  * You have to push the buttons in the sequence 1-2-3-4-4-3-2-1
  * repeatedly to avoid the output line getting turned on.
  */
- 
+
+#define DEBUG 0
 
 int pattern[] = {1,2,3,4,4,3,2,1};
 
@@ -47,7 +48,9 @@ void setup() {
     pinMode(ledPins[i], OUTPUT);     // declare pushbutton as input  
   }
   
+#if DEBUG
     Serial.begin(9600);           // Set up serial communication at 9600bps
+#endif
     allowedTime = maxTime;
     
     // Attractor loop
@@ -75,18 +78,23 @@ void loop(){
   }
   if (allowedTime > maxTime) allowedTime = maxTime; // but no slower than the absolute limit
       
+#if DEBUG
   Serial.print(allowedTime / 1000L);
   Serial.print("ms ");
   Serial.print(phase);
   Serial.print(": ");
+#endif
+
   time = pulseIn(buttonForPhase(phase), HIGH, allowedTime);
   if (time == 0L) {            // did they click the expected switch?
       if (!errorOn) {
         analogWrite(signalPin, 128); // Play 1 490hz 50% square wave
         digitalWrite(lightPin, HIGH);
         phase = 0;
-        Serial.println("BZZZT!");
         errorOn = 1;
+#if DEBUG
+        Serial.println("BZZZT!");
+#endif
       } 
       errorCount++;
       if (percentMargin < maxMargin) percentMargin++;
@@ -97,9 +105,11 @@ void loop(){
       digitalWrite(lightPin, LOW); // turn off
       errorOn = 0;
       phase = (phase + 1) % 8;
+#if DEBUG
       Serial.print(time / 1000L);
       Serial.println("ms");
-      
+#endif
+
       if (time > 5000L) {
         totalTime += time;
         numSamples++;
